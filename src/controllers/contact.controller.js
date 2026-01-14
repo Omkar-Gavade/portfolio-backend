@@ -5,7 +5,7 @@ export const createContact = async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // Basic validation
+    // Validate input
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -13,20 +13,20 @@ export const createContact = async (req, res) => {
       });
     }
 
-    // Save contact message to DB
+    // Save message to database
     const contact = await Contact.create({
       name,
       email,
       message,
     });
 
-    // ✅ RESPOND IMMEDIATELY (do NOT wait for email)
+    // IMPORTANT: respond immediately
     res.status(201).json({
       success: true,
       message: "Message sent successfully",
     });
 
-    // 🔥 Send email asynchronously (non-blocking)
+    // Send email asynchronously (DO NOT await)
     transporter
       .sendMail({
         from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
@@ -47,9 +47,8 @@ ${message}
       });
 
   } catch (error) {
-    console.error("Error creating contact:", error);
+    console.error("Contact API error:", error);
 
-    // Safety fallback
     res.status(500).json({
       success: false,
       message: "Internal server error",
