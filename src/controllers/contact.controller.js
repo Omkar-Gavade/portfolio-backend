@@ -3,9 +3,6 @@ import transporter from "../config/mail.js";
 
 export const createContact = async (req, res) => {
   try {
-    // Log request hit (useful during development)
-    
-
     const { name, email, message } = req.body;
 
     // Basic validation
@@ -16,40 +13,44 @@ export const createContact = async (req, res) => {
       });
     }
 
-    // Save contact message
+    // Save contact message to DB
     const contact = await Contact.create({
       name,
       email,
       message,
     });
 
-    console.log("Contact saved:", contact._id);
-    
-
-    // Send email notification
-//     await transporter.sendMail({
-//       from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
-//       to: process.env.EMAIL_USER,
-//       subject: "New Portfolio Contact Message",
-//       text: `
-// You received a new message from your portfolio website.
-
-// Name: ${name}
-// Email: ${email}
-
-// Message:
-// ${message}
-//       `,
-//     });
-
-    return res.status(201).json({
+    // ✅ RESPOND IMMEDIATELY (do NOT wait for email)
+    res.status(201).json({
       success: true,
       message: "Message sent successfully",
     });
+
+    // 🔥 Send email asynchronously (non-blocking)
+    transporter
+      .sendMail({
+        from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER,
+        subject: "New Portfolio Contact Message",
+        text: `
+You received a new message from your portfolio website.
+
+Name: ${name}
+Email: ${email}
+
+Message:
+${message}
+        `,
+      })
+      .catch((err) => {
+        console.error("Email sending failed:", err);
+      });
+
   } catch (error) {
     console.error("Error creating contact:", error);
 
-    return res.status(500).json({
+    // Safety fallback
+    res.status(500).json({
       success: false,
       message: "Internal server error",
     });
