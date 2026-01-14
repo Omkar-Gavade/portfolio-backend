@@ -1,16 +1,14 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // TLS
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS, // Gmail App Password
   },
+  connectionTimeout: 10000, // 10 seconds timeout
 });
 
 export default transporter;
