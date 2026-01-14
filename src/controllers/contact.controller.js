@@ -27,20 +27,20 @@ export const createContact = async (req, res) => {
     
 
     // Send email notification
-    await transporter.sendMail({
-      from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      subject: "New Portfolio Contact Message",
-      text: `
-You received a new message from your portfolio website.
+//     await transporter.sendMail({
+//       from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
+//       to: process.env.EMAIL_USER,
+//       subject: "New Portfolio Contact Message",
+//       text: `
+// You received a new message from your portfolio website.
 
-Name: ${name}
-Email: ${email}
+// Name: ${name}
+// Email: ${email}
 
-Message:
-${message}
-      `,
-    });
+// Message:
+// ${message}
+//       `,
+//     });
 
     return res.status(201).json({
       success: true,
