@@ -1,4 +1,5 @@
 import Contact from "../models/Contact.js";
+import transporter from "../config/mail.js";
 
 export const createContact = async (req, res) => {
   try {
@@ -11,17 +12,35 @@ export const createContact = async (req, res) => {
       });
     }
 
-    await Contact.create({ name, email, message });
+    // Save to DB
+    const contact = await Contact.create({ name, email, message });
+    console.log("Saved:", contact._id);
 
-    return res.status(201).json({
+    // Respond immediately (IMPORTANT)
+    res.status(201).json({
       success: true,
       message: "Message sent successfully",
     });
+
+    // 🔥 Send email (non-blocking)
+    transporter
+      .sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER,
+        subject: "New Contact Message",
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+      })
+      .then(() => console.log("Email sent"))
+      .catch((err) => console.error("Email error:", err.message));
+
   } catch (error) {
     console.error("Contact API error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
   }
 };
